@@ -163,3 +163,29 @@ Task FR-A2: implement secure POST /api/auth/login with username/email + password
 
 [User Message]
 Task FR-A3 + FR-A4: implement secure `POST /api/auth/refresh` and `POST /api/auth/logout` with token validation, refresh issuance, revocation/invalidation, secure status codes, and layered security analysis.
+
+[User Message]
+# AGENTS.md instructions for /workspace/llm-study-01-post
+(Full instructions provided in prompt.)
+
+[User Message]
+<environment_context>
+  <cwd>/workspace/llm-study-01-post</cwd>
+  <shell>bash</shell>
+</environment_context>
+
+[User Message]
+Task FR-A5 to FR-A10: implement secure change-password, reset-request, reset-confirm, password-rules GET/PUT, MFA challenge/verify with secure DTO/service/controller/repository/entity/security architecture and layered security requirements.
+
+[User Message]
+# AGENTS.md instructions for /workspace/llm-study-01-post
+(Full instructions provided in prompt.)
+
+[User Message]
+<environment_context>
+  <cwd>/workspace/llm-study-01-post</cwd>
+  <shell>bash</shell>
+</environment_context>
+
+[User Message]
+Task FR-A11 and FR-A12: implement secure API key lifecycle endpoints and deterministic credential request handling responses with secure-by-design controls.

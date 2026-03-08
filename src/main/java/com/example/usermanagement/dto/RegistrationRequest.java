@@ -16,12 +16,12 @@ public record RegistrationRequest(
         @Size(max = 254)
         String email,
 
+        @Size(max = 20)
+        @Pattern(regexp = "^$|^\\+?[1-9]\\d{7,14}$", message = "phoneNumber must be E.164 format")
+        String phoneNumber,
+
         @NotBlank
-        @Size(min = 12, max = 72)
-        @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{12,72}$",
-                message = "password must include uppercase, lowercase, digit, and special character"
-        )
+        @Size(min = 8, max = 72)
         String password
 ) {
 }

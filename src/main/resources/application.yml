@@ -19,3 +19,8 @@ app:
       issuer: user-management-service
       ttl-minutes: 30
       secret-base64: ${APP_JWT_SECRET:}
+    auth:
+      reset-token-ttl-minutes: 20
+      otp-ttl-minutes: 5
+      otp-max-attempts: 5
+      notification-endpoint: ${APP_NOTIFICATION_ENDPOINT:https://notification.example.internal/send}

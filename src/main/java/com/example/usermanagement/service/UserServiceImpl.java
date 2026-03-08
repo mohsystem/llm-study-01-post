@@ -28,17 +28,20 @@ public class UserServiceImpl implements UserService {
     private final RevokedTokenRepository revokedTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final PasswordRulesService passwordRulesService;
 
     public UserServiceImpl(
             UserRepository userRepository,
             RevokedTokenRepository revokedTokenRepository,
             PasswordEncoder passwordEncoder,
-            TokenService tokenService
+            TokenService tokenService,
+            PasswordRulesService passwordRulesService
     ) {
         this.userRepository = userRepository;
         this.revokedTokenRepository = revokedTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.passwordRulesService = passwordRulesService;
     }
 
     @Override
@@ -54,9 +57,14 @@ public class UserServiceImpl implements UserService {
             throw new DuplicateResourceException("Email already exists");
         }
 
+        passwordRulesService.validateOrThrow(request.password());
+
         User user = new User();
         user.setUsername(normalizedUsername);
         user.setEmail(normalizedEmail);
+        if (request.phoneNumber() != null && !request.phoneNumber().isBlank()) {
+            user.setPhoneNumber(request.phoneNumber().trim());
+        }
         user.setPasswordHash(passwordEncoder.encode(request.password()));
 
         try {
