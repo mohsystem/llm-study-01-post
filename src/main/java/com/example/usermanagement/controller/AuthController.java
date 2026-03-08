@@ -2,12 +2,16 @@ package com.example.usermanagement.controller;
 
 import com.example.usermanagement.dto.LoginRequest;
 import com.example.usermanagement.dto.LoginResponse;
+import com.example.usermanagement.dto.LogoutResponse;
+import com.example.usermanagement.dto.RefreshResponse;
 import com.example.usermanagement.dto.RegistrationRequest;
 import com.example.usermanagement.dto.RegistrationResponse;
 import com.example.usermanagement.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +36,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = userService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> refresh(@AuthenticationPrincipal Jwt jwt) {
+        RefreshResponse response = userService.refresh(jwt);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponse> logout(@AuthenticationPrincipal Jwt jwt) {
+        LogoutResponse response = userService.logout(jwt);
         return ResponseEntity.ok(response);
     }
 }

@@ -2,6 +2,7 @@ package com.example.usermanagement.service;
 
 import com.example.usermanagement.config.JwtProperties;
 import java.time.Instant;
+import java.util.UUID;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -28,6 +29,7 @@ public class JwtTokenService implements TokenService {
         Instant expiresAt = now.plusSeconds(jwtProperties.ttlMinutes() * 60);
 
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
+                .id(UUID.randomUUID().toString())
                 .issuer(jwtProperties.issuer())
                 .issuedAt(now)
                 .expiresAt(expiresAt)

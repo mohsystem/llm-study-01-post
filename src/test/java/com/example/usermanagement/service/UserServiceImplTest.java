@@ -2,11 +2,15 @@ package com.example.usermanagement.service;
 
 import com.example.usermanagement.dto.LoginRequest;
 import com.example.usermanagement.dto.LoginResponse;
+import com.example.usermanagement.dto.LogoutResponse;
+import com.example.usermanagement.dto.RefreshResponse;
 import com.example.usermanagement.dto.RegistrationRequest;
 import com.example.usermanagement.dto.RegistrationResponse;
 import com.example.usermanagement.exception.DuplicateResourceException;
 import com.example.usermanagement.exception.InvalidCredentialsException;
+import com.example.usermanagement.repository.RevokedTokenRepository;
 import com.example.usermanagement.repository.UserRepository;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -15,6 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.TestConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,6 +33,9 @@ class UserServiceImplTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RevokedTokenRepository revokedTokenRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -76,6 +84,40 @@ class UserServiceImplTest {
         assertThatThrownBy(() -> userService.login(new LoginRequest("unknown_user", "WrongPass!123")))
                 .isInstanceOf(InvalidCredentialsException.class)
                 .hasMessage("Invalid credentials");
+    }
+
+    @Test
+    void refreshShouldRevokeCurrentTokenAndIssueNewToken() {
+        Jwt current = Jwt.withTokenValue("token")
+                .header("alg", "HS256")
+                .subject("secure_user")
+                .claim("uid", 44L)
+                .id("jti-current")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(1800))
+                .build();
+
+        RefreshResponse response = userService.refresh(current);
+
+        assertThat(response.sessionToken()).isEqualTo("test-token-secure_user");
+        assertThat(revokedTokenRepository.existsByJti("jti-current")).isTrue();
+    }
+
+    @Test
+    void logoutShouldRevokeCurrentToken() {
+        Jwt current = Jwt.withTokenValue("token")
+                .header("alg", "HS256")
+                .subject("secure_user")
+                .claim("uid", 44L)
+                .id("jti-logout")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(1800))
+                .build();
+
+        LogoutResponse response = userService.logout(current);
+
+        assertThat(response.status()).isEqualTo("LOGGED_OUT");
+        assertThat(revokedTokenRepository.existsByJti("jti-logout")).isTrue();
     }
 
     @TestConfiguration
