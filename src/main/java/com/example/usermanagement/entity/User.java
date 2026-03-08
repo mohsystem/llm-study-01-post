@@ -6,60 +6,51 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
-import java.util.Objects;
+import jakarta.persistence.UniqueConstraint;
+import java.time.Instant;
 
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_users_username", columnNames = "username"),
+                @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+        }
+)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String fullName;
+    @Column(nullable = false, length = 32)
+    private String username;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(nullable = false, length = 254)
     private String email;
 
-    @Column(nullable = false)
-    private boolean active = true;
+    @Column(nullable = false, length = 100)
+    private String passwordHash;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
 
     @PrePersist
     void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    @PreUpdate
-    void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getUsername() {
+        return username;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -70,35 +61,15 @@ public class User {
         this.email = email;
     }
 
-    public boolean isActive() {
-        return active;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof User user)) {
-            return false;
-        }
-        return Objects.equals(id, user.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
