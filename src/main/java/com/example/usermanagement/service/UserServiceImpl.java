@@ -1,10 +1,14 @@
 package com.example.usermanagement.service;
 
+import com.example.usermanagement.dto.LoginRequest;
+import com.example.usermanagement.dto.LoginResponse;
 import com.example.usermanagement.dto.RegistrationRequest;
 import com.example.usermanagement.dto.RegistrationResponse;
 import com.example.usermanagement.entity.User;
 import com.example.usermanagement.exception.DuplicateResourceException;
+import com.example.usermanagement.exception.InvalidCredentialsException;
 import com.example.usermanagement.repository.UserRepository;
+import java.util.Locale;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,17 +19,19 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
     @Override
     @Transactional
     public RegistrationResponse register(RegistrationRequest request) {
         String normalizedUsername = request.username().trim();
-        String normalizedEmail = request.email().trim().toLowerCase();
+        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
 
         if (userRepository.existsByUsernameIgnoreCase(normalizedUsername)) {
             throw new DuplicateResourceException("Username already exists");
@@ -45,5 +51,22 @@ public class UserServiceImpl implements UserService {
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateResourceException("Username or email already exists");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request) {
+        String normalizedIdentity = request.usernameOrEmail().trim();
+        String normalizedEmailIdentity = normalizedIdentity.toLowerCase(Locale.ROOT);
+
+        User user = userRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(normalizedIdentity, normalizedEmailIdentity)
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+
+        String token = tokenService.generateToken(user.getId(), user.getUsername());
+        return new LoginResponse(token);
     }
 }

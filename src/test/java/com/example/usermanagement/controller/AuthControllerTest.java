@@ -1,16 +1,19 @@
 package com.example.usermanagement.controller;
 
 import com.example.usermanagement.config.SecurityConfig;
+import com.example.usermanagement.dto.LoginRequest;
+import com.example.usermanagement.dto.LoginResponse;
 import com.example.usermanagement.dto.RegistrationRequest;
 import com.example.usermanagement.dto.RegistrationResponse;
 import com.example.usermanagement.exception.GlobalExceptionHandler;
+import com.example.usermanagement.exception.InvalidCredentialsException;
 import com.example.usermanagement.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -56,5 +59,31 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void loginShouldReturnToken() throws Exception {
+        given(userService.login(any(LoginRequest.class))).willReturn(new LoginResponse("jwt-token"));
+
+        LoginRequest request = new LoginRequest("secure_user", "StrongPass!123");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sessionToken").value("jwt-token"));
+    }
+
+    @Test
+    void loginShouldReturnUnauthorizedForInvalidCredentials() throws Exception {
+        given(userService.login(any(LoginRequest.class))).willThrow(new InvalidCredentialsException("Invalid credentials"));
+
+        LoginRequest request = new LoginRequest("secure_user", "WrongPass!123");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Invalid credentials"));
     }
 }

@@ -12,3 +12,10 @@ spring:
   h2:
     console:
       enabled: true
+
+app:
+  security:
+    jwt:
+      issuer: user-management-service
+      ttl-minutes: 30
+      secret-base64: ${APP_JWT_SECRET:}
