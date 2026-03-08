@@ -189,3 +189,29 @@ Task FR-A5 to FR-A10: implement secure change-password, reset-request, reset-con
 
 [User Message]
 Task FR-A11 and FR-A12: implement secure API key lifecycle endpoints and deterministic credential request handling responses with secure-by-design controls.
+
+[User Message]
+# AGENTS.md instructions for /workspace/llm-study-01-post
+(Full instructions provided in prompt.)
+
+[User Message]
+<environment_context>
+  <cwd>/workspace/llm-study-01-post</cwd>
+  <shell>bash</shell>
+</environment_context>
+
+[User Message]
+Fix this codeql warning: Required Gradle version not specified. Analyzed a Gradle project without the Gradle wrapper.
+
+[User Message]
+# AGENTS.md instructions for /workspace/llm-study-01-post
+(Full instructions provided in prompt.)
+
+[User Message]
+<environment_context>
+  <cwd>/workspace/llm-study-01-post</cwd>
+  <shell>bash</shell>
+</environment_context>
+
+[User Message]
+Error: Binary files are not supported when Create PR.
