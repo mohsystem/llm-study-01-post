@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:usermgmt;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+
+app:
+  security:
+    jwt:
+      issuer: user-management-service
+      ttl-minutes: 30
+      secret-base64: ${APP_JWT_SECRET:}
+    auth:
+      reset-token-ttl-minutes: 20
+      otp-ttl-minutes: 5
+      otp-max-attempts: 5
+      notification-endpoint: ${APP_NOTIFICATION_ENDPOINT:https://notification.example.internal/send}
